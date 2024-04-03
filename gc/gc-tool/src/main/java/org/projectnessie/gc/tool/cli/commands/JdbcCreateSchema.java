@@ -40,11 +40,14 @@ public class JdbcCreateSchema extends BaseCommand {
   protected Integer call(Closeables closeables) throws Exception {
     DataSource dataSource = closeables.maybeAdd(jdbc.createDataSource());
     SchemaCreateStrategy schemaCreateStrategy = jdbc.getSchemaCreateStrategy();
+
     if (schemaCreateStrategy == null) {
       schemaCreateStrategy = SchemaCreateStrategy.CREATE;
     }
     try (Connection conn = dataSource.getConnection()) {
       schemaCreateStrategy.apply(conn);
+      // by default autocommit is set to false, so we commit here
+      conn.commit();
     }
     commandSpec
         .commandLine()
